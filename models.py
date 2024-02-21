@@ -168,6 +168,10 @@ class User(db.Model):
                 return user
 
         return False
+    
+    @classmethod
+    def __repr__(self):
+        return f'<User {self.id}, email:{self.email}, image_url: {self.image_url}, header_image_url: {self.image_url}, bio: {self.bio}'
 
 
 class Message(db.Model):
