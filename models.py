@@ -1,7 +1,7 @@
 """SQLAlchemy models for Warbler."""
 
 from datetime import datetime
-
+from sqlite3 import IntegrityError
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 
@@ -136,6 +136,9 @@ class User(db.Model):
 
         Hashes password and adds user to system.
         """
+
+        if User.query.filter_by(username=username).first():
+            return IntegrityError
 
         hashed_pwd = bcrypt.generate_password_hash(password).decode('UTF-8')
 
