@@ -383,8 +383,6 @@ def homepage():
         for like in likes:
             liked_messages.append(like.id)
 
-        print(liked_messages)
-
         return render_template('home.html', messages=all_messages_sorted, liked_messages=liked_messages)
 
     else:
