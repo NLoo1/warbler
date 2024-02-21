@@ -325,8 +325,19 @@ def homepage():
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
+        # List of users following
+        following = g.user.following
 
-        return render_template('home.html', messages=messages)
+        all_messages = []
+
+        for user in following:
+            user_messages = user.messages
+            all_messages.extend(user_messages)
+
+        all_messages.sort(key=lambda post: post.timestamp, reverse=True)
+        all_messages_sorted = all_messages[:100]
+
+        return render_template('home.html', messages=all_messages_sorted)
 
     else:
         return render_template('home-anon.html')
