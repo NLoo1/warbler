@@ -340,6 +340,7 @@ def messages_destroy(message_id):
     db.session.delete(msg)
     db.session.commit()
 
+    flash('Deleted')
     return redirect(f"/users/{g.user.id}")
 
 
