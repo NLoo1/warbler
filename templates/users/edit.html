@@ -12,7 +12,9 @@
           {% for error in field.errors %}
             <span class="text-danger">{{ error }}</span>
           {% endfor %}
-          {{ field(placeholder=field.label.text, class="form-control") }}
+          {% set user_value = user[field.name] if user is defined and field.name!='password' else None %}
+          {{field.label}}
+          {{ field(placeholder=field.label.text, class="form-control", value=user_value) }}
         {% endfor %}
 
         <p>To confirm changes, enter your password:</p>
