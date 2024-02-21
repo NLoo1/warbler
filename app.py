@@ -6,7 +6,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, UserEditForm
-from models import db, connect_db, User, Message
+from models import Likes, db, connect_db, User, Message
 
 CURR_USER_KEY = "curr_user"
 
@@ -158,6 +158,23 @@ def users_show(user_id):
                 .all())
     return render_template('users/show.html', user=user, messages=messages)
 
+@app.route('/users/<int:user_id>/messages')
+def show_messages(user_id):
+    """Show list of messages this user has posted."""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    
+    messages = (Message
+                .query
+                .filter(Message.user_id == user_id)
+                .order_by(Message.timestamp.desc())
+                .limit(100)
+                .all())
+
+    user = User.query.get_or_404(user_id)
+    return render_template('users/messages.html', user=user, messages=messages)
 
 @app.route('/users/<int:user_id>/following')
 def show_following(user_id):
@@ -181,6 +198,25 @@ def users_followers(user_id):
 
     user = User.query.get_or_404(user_id)
     return render_template('users/followers.html', user=user)
+
+@app.route('/users/<int:user_id>/likes')
+def users_likes(user_id):
+    """Show list of likes of this user."""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    
+    liked_messages = (Message.query
+                 .join(Likes, Likes.message_id == Message.id)
+                 .filter(Likes.user_id == user_id)
+                 .order_by(Message.timestamp.desc())
+                 .limit(100)
+                 .all())
+
+
+    user = User.query.get_or_404(user_id)
+    return render_template('users/likes.html', user=user, messages=liked_messages)
 
 
 @app.route('/users/follow/<int:follow_id>', methods=['POST'])
@@ -331,16 +367,42 @@ def homepage():
         all_messages = []
 
         for user in following:
+            # get each message from a followed user
             user_messages = user.messages
             all_messages.extend(user_messages)
 
+        # All messages from followed users, limit 100
         all_messages.sort(key=lambda post: post.timestamp, reverse=True)
         all_messages_sorted = all_messages[:100]
 
-        return render_template('home.html', messages=all_messages_sorted)
+        # Get user's liked messages ==> [Messages]
+        likes = g.user.likes
+
+        liked_messages = []
+
+        for like in likes:
+            liked_messages.append(like.id)
+
+        print(liked_messages)
+
+        return render_template('home.html', messages=all_messages_sorted, liked_messages=liked_messages)
 
     else:
         return render_template('home-anon.html')
+    
+
+@app.route('/users/add_like/<msg_id>', methods=['POST'])
+def add_like(msg_id):
+    new_like = Likes(user_id=session['curr_user'], message_id=msg_id)
+    db.session.add(new_like)
+    db.session.commit()
+    return redirect('/')
+
+@app.route('/users/remove_like/<msg_id>', methods=['POST'])
+def remove_like(msg_id):
+    Likes.query.filter_by(user_id=session['curr_user'],message_id=msg_id).delete()
+    db.session.commit()
+    return redirect('/')
 
 
 ##############################################################################

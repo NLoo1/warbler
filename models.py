@@ -199,6 +199,10 @@ class Message(db.Model):
 
     user = db.relationship('User')
 
+    @classmethod 
+    def __repr__(self):
+        return f'Message {self.id}, user id {self.user_id}'
+
 
 def connect_db(app):
     """Connect this database to provided Flask app.

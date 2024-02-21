@@ -42,28 +42,35 @@
       <ul class="list-group" id="messages">
         {% for msg in messages %}
           <li class="list-group-item">
-            <a href="/messages/{{ msg.id  }}" class="message-link"/>
-            <a href="/users/{{ msg.user.id }}">
-              <img src="{{ msg.user.image_url }}" alt="" class="timeline-image">
+            <a href="/messages/{{ msg.id }}" class="message-link">
+              <a href="/users/{{ msg.user.id }}">
+                <img src="{{ msg.user.image_url }}" alt="" class="timeline-image">
+              </a>
+              <div class="message-area col-10">
+                <a href="/users/{{ msg.user.id }}">@{{ msg.user.username }}</a>
+                <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
+                <p>{{ msg.text }}</p>
+              </div>
             </a>
-            <div class="message-area">
-              <a href="/users/{{ msg.user.id }}">@{{ msg.user.username }}</a>
-              <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
-              <p>{{ msg.text }}</p>
-            </div>
-            <form method="POST" action="/users/add_like/{{ msg.id }}" id="messages-form">
-              <button class="
-                btn 
-                btn-sm 
-                {{'btn-primary' if msg.id in likes else 'btn-secondary'}}"
-              >
-                <i class="fa fa-thumbs-up"></i> 
-              </button>
-            </form>
+    
+            {% if msg.id not in liked_messages %}
+              <form method="POST" action="/users/add_like/{{ msg.id }}" id="like-form-{{ msg.id }}" class="like-form">
+                <button type="submit" class="btn btn-sm btn-primary">
+                  <i class="fa fa-thumbs-up"></i>
+                </button>
+              </form>
+            {% else %}
+              <form method="POST" action="/users/remove_like/{{ msg.id }}" id="unlike-form-{{ msg.id }}" class="unlike-form">
+                <button type="submit" class="btn btn-sm btn-danger">
+                  <i class="fa fa-thumbs-up"></i>
+                </button>
+              </form>
+            {% endif %}
           </li>
         {% endfor %}
       </ul>
     </div>
+    
 
   </div>
 {% endblock %}
