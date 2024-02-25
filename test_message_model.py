@@ -10,7 +10,8 @@ from app import app
 
 load_dotenv()
 
-os.environ['DATABASE_URL'] = "postgresql:///warbler_test"
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    os.environ.get('DATABASE_URL_TEST', 'postgresql:///warbler_test'))
 os.environ['FLASK_ENV'] = 'production'
 
 db.drop_all()
